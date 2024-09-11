@@ -32,17 +32,16 @@ RUN a2ensite default-ssl
 
 # Đổi port mặc định 80 => 8080
 # Đổi port mặc định 443 => 8443
-# NukeViet bình thường không sao nhưng SSO Server trên HSTDT nếu proxy khác post sẽ gặp vấn đề lớn
-#RUN sed -i -e "s/80/8080/g" "/etc/apache2/ports.conf"
-#RUN sed -i -e "s/443/8443/g" "/etc/apache2/ports.conf"
-#RUN sed -i -e "s/:\s*80/:8080/g" "/etc/apache2/sites-enabled/000-default.conf"
-#RUN sed -i -e "s/:\s*443/:8443/g" "/etc/apache2/sites-enabled/default-ssl.conf"
+RUN sed -i -e "s/80/8080/g" "/etc/apache2/ports.conf"
+RUN sed -i -e "s/443/8443/g" "/etc/apache2/ports.conf"
+RUN sed -i -e "s/:\s*80/:8080/g" "/etc/apache2/sites-enabled/000-default.conf"
+RUN sed -i -e "s/:\s*443/:8443/g" "/etc/apache2/sites-enabled/default-ssl.conf"
 
 # Set a volume mount point for your code
 VOLUME /var/www/html
 
 COPY --chmod=755 ./docker-entrypoint.sh /var/www/tmp/docker-entrypoint.sh
-COPY /.env /var/www/tmp/.env
+# COPY /.env /var/www/tmp/.env
 # COPY ./opcache.ini $PHP_INI_DIR/conf.d/
 
 # Ensure the entrypoint file can be run
