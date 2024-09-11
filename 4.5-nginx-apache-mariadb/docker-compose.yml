@@ -1,0 +1,73 @@
+version: '4'
+
+networks:
+  nukeviet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
+          ip_range: 172.18.5.0/24
+
+services:
+  db:
+    container_name: db
+    hostname: db
+    image: mariadb:11.4
+    volumes:
+      - ./conf/my.cnf:/etc/mysql/conf.d/nukeviet.cnf
+      - ./_docker/mysql:/var/lib/mysql
+      - ./db:/home
+    environment:
+      MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: 1
+      TZ: ${TimeZone}
+    command: >
+      bash -c " chmod 644 /etc/mysql/conf.d/nukeviet.cnf && /usr/local/bin/docker-entrypoint.sh mariadbd "
+    networks:
+      nukeviet:
+        ipv4_address: 172.18.5.1
+
+  phpmyadmin:
+    container_name: phpmyadmin
+    hostname: phpmyadmin
+    image: phpmyadmin:5.2.1-apache
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      TZ: ${TimeZone}
+    depends_on:
+      - db
+    networks:
+      nukeviet:
+        ipv4_address: 172.18.5.2
+
+  nukeviet_reverse_proxy:
+    container_name: nukeviet_reverse_proxy
+    image: nginx:1.25
+    volumes:
+      - ./conf/nginx:/etc/nginx/conf.d
+    environment:
+      TZ: ${TimeZone}
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      nukeviet:
+        ipv4_address: 172.18.5.3
+    depends_on:
+      - nukeviet
+
+  nukeviet:
+    container_name: nukeviet
+    hostname: nukeviet
+    build:
+      dockerfile: Dockerfile
+      context: ./conf/php82
+    volumes:
+      - ./src:/var/www/html
+    networks:
+      nukeviet:
+        ipv4_address: 172.18.5.4
+    environment:
+      TZ: ${TimeZone}
+    depends_on:
+      - db
