@@ -47,7 +47,7 @@ mkdir -p "$DIR_PATH/db"
 if [ ! -f "$DIR_PATH/src/src/index.php" ] ; then
   cd "$DIR_PATH/src"
   git clone https://github.com/nukeviet/nukeviet.git ./
-  git checkout nukeviet4.6
+  git checkout nukeviet5.0
 
   if ( (uname -s) 2>&1 ) | grep 'Linux' ; then
     find "$DIR_PATH/src" -name '.git' -type d -exec bash -c 'git config --global --add safe.directory ${0%/.git}' {} \;
@@ -91,7 +91,7 @@ DB_READY=0
 while [ $attempt -le 59 ]; do
   attempt=$(( $attempt + 1 ))
   echo "Đợi mariadb sẵn sàng (lần $attempt)..."
-  result=$( (docker logs db) 2>&1 )
+  result=$( (docker logs nukeviet_db) 2>&1 )
   if grep -q 'MariaDB init process done. Ready for start up' <<< $result ; then
     echo "MariaDB sẵn sàng!"
     DB_READY=1
@@ -115,7 +115,7 @@ NGINX_READY=0
 while [ $attempt -le 59 ]; do
   attempt=$(( $attempt + 1 ))
   echo "Đợi nginx sẵn sàng (lần $attempt)..."
-  result=$( (docker logs nginx) 2>&1 )
+  result=$( (docker logs nukeviet_nginx) 2>&1 )
   if grep -q 'Configuration complete; ready for start up' <<< $result ; then
     echo "Nginx sẵn sàng!"
     NGINX_READY=1
